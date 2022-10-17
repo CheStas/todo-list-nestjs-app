@@ -22,3 +22,8 @@ http://localhost:3000/docs
 ```bash
 $ npm run test
 ```
+
+## Running the app production
+```bash
+docker-compose -f docker-compose-prod.yml up
+```

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: api
+    volumes:
+      - .:/usr/src/app
+    command: npm run start:prod
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo
+    container_name: mongo
+    volumes:
+      - './data:/data/db'
