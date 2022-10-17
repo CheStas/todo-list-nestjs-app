@@ -12,6 +12,10 @@ export class UsersService {
   ) {}
 
   async create(userDto: CreateUserDto) {
-    return await this.userModel.create(userDto);
+    const user = await this.userModel.create(userDto);
+    return {
+      id: user.id,
+      name: user.name,
+    };
   }
 }

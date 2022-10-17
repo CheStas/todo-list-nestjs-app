@@ -28,6 +28,7 @@ export class TasksController {
 
   @Get()
   @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 422, description: 'User not found' })
   findAll(@Param('userId') userId: number) {
     return this.tasksService.findAll(userId);
   }

@@ -23,6 +23,11 @@ http://localhost:3000/docs
 $ npm run test
 ```
 
+### Generate test coverage
+```
+$ npm run test:cov
+```
+
 ## Running the app production
 ```bash
 docker-compose -f docker-compose-prod.yml up

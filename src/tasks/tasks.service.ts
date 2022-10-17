@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/users/user.schema';
@@ -17,10 +17,10 @@ export class TasksService {
   async create(taskDto: TaskDto) {
     const user = await this.userModel.findOne({ id: taskDto.userId });
     if (!user) {
-      throw new NotFoundException({
-        message: 'User not found',
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      });
+      throw new HttpException(
+        'User not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     const task = await this.taskModel.create({
       ...taskDto,
@@ -28,32 +28,49 @@ export class TasksService {
     });
     user.tasks.push(task);
     await user.save();
-    return task;
+    return {
+      id: task.id,
+      name: task.name,
+      isDone: task.isDone,
+    };
   }
 
   async findAll(userId: number) {
-    return await this.userModel
+    const user = await this.userModel
       .findOne({ id: userId, select: ['id', 'name', 'tasks'] })
-      .populate({ path: 'tasks', select: ['id', 'name', 'isDone'] })
+      .populate({
+        path: 'tasks',
+        select: { _id: 0, id: 1, name: 1, isDone: 1 },
+      })
+      .select({ _id: 0, id: 1, name: 1, tasks: 1 })
       .exec();
+
+    if (!user) {
+      throw new HttpException(
+        'User not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    return user;
   }
 
   async update(taskDto: TaskDto) {
     const user = await this.userModel.findOne({ id: taskDto.userId });
 
     if (!user) {
-      throw new NotFoundException({
-        message: 'User not found',
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      });
+      throw new HttpException(
+        'User not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     const task = await this.taskModel.findOne({ id: taskDto.id, user });
 
     if (!task) {
-      throw new NotFoundException({
-        message: 'Task not found',
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      });
+      throw new HttpException(
+        'Task not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
 
     if (taskDto.hasOwnProperty('name')) {
@@ -63,16 +80,21 @@ export class TasksService {
       task.isDone = taskDto.isDone;
     }
 
-    return task.save();
+    await task.save();
+    return {
+      id: task.id,
+      name: task.name,
+      isDone: task.isDone,
+    };
   }
 
   async delete(userId: number, id: number) {
     const user = await this.userModel.findOne({ id: userId });
     if (!user) {
-      throw new NotFoundException({
-        message: 'User not found',
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      });
+      throw new HttpException(
+        'User not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     return this.taskModel.deleteOne({ id, user });
   }

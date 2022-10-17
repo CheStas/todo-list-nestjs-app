@@ -31,29 +31,27 @@ describe('UsersService', () => {
   describe('create', () => {
     it('should create new user, empty body', async () => {
       const response: any = {
+        id: 1,
         name: 'name',
-        tasks: [],
       };
       jest
         .spyOn(mockUserModel, 'create')
         .mockImplementationOnce(() => Promise.resolve(response));
 
-      expect(await service.create({})).toBe(response);
+      expect(await service.create({})).toMatchObject(response);
     });
 
     it('should create new user with name', async () => {
       const userData: any = {
-        _id: '_id',
-        id: 'id',
+        id: 1,
         name: 'name',
-        tasks: [],
       };
 
       jest
         .spyOn(mockUserModel, 'create')
         .mockImplementationOnce(() => Promise.resolve(userData));
 
-      expect(await service.create({ name: 'name' })).toBe(userData);
+      expect(await service.create({ name: 'name' })).toMatchObject(userData);
     });
   });
 });
